@@ -2911,7 +2911,7 @@ ambw_end:
         || check_opt_strings(curbuf->b_p_bt, p_buftype_values, false) != OK) {
       errmsg = e_invarg;
     } else {
-      if (curwin->w_status_height) {
+      if (curwin->w_status_height || global_stl_height()) {
         curwin->w_redr_status = true;
         redraw_later(curwin, VALID);
       }
@@ -5646,7 +5646,7 @@ static int put_setbool(FILE *fd, char *cmd, char *name, int value)
 
 void comp_col(void)
 {
-  int last_has_status = (p_ls == 2 || (p_ls == 1 && !ONE_WINDOW));
+  int last_has_status = (p_ls > 1 || (p_ls == 1 && !ONE_WINDOW));
 
   sc_col = 0;
   ru_col = 0;

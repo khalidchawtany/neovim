@@ -3652,6 +3652,8 @@ A jump table for the options with a short description can be found at |Q_op|.
 		0: never
 		1: only if there are at least two windows
 		2: always
+		3: have a global statusline at the bottom instead of one for
+		   each window
 	The screen looks nicer with a status line if you have several
 	windows, but it takes another screen line. |status-line|
 
@@ -5929,7 +5931,7 @@ A jump table for the options with a short description can be found at |Q_op|.
 	empty to avoid further errors.  Otherwise screen updating would loop.
 
 	Note that the only effect of 'ruler' when this option is set (and
-	'laststatus' is 2) is controlling the output of |CTRL-G|.
+	'laststatus' is 2 or 3) is controlling the output of |CTRL-G|.
 
 	field	    meaning ~
 	-	    Left justify the item.  The default is right justified

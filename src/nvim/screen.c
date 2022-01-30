@@ -317,7 +317,8 @@ void update_curbuf(int type)
 void redraw_buf_status_later(buf_T *buf)
 {
   FOR_ALL_WINDOWS_IN_TAB(wp, curtab) {
-    if (wp->w_buffer == buf && wp->w_status_height) {
+    if (wp->w_buffer == buf
+        && (wp->w_status_height || (wp == curwin && global_stl_height()))) {
       wp->w_redr_status = true;
       if (must_redraw < VALID) {
         must_redraw = VALID;
@@ -335,6 +336,7 @@ void redraw_buf_status_later(buf_T *buf)
 int update_screen(int type)
 {
   static bool did_intro = false;
+  bool is_stl_global = global_stl_height() > 0;
 
   // Don't do anything if the screen structures are (not yet) valid.
   // A VimResized autocmd can invoke redrawing in the middle of a resize,
@@ -417,9 +419,12 @@ int update_screen(int type)
           if (W_ENDROW(wp) > valid) {
             wp->w_redr_type = MAX(wp->w_redr_type, NOT_VALID);
           }
-          if (W_ENDROW(wp) + wp->w_status_height > valid) {
+          if (!is_stl_global && W_ENDROW(wp) + wp->w_status_height > valid) {
             wp->w_redr_status = true;
           }
+        }
+        if (is_stl_global && Rows - p_ch - 1 > valid) {
+          curwin->w_redr_status = true;
         }
       }
       msg_grid_set_pos(Rows-p_ch, false);
@@ -442,12 +447,14 @@ int update_screen(int type)
             wp->w_redr_type = REDRAW_TOP;
           } else {
             wp->w_redr_type = NOT_VALID;
-            if (W_ENDROW(wp) + wp->w_status_height
-                <= msg_scrolled) {
-              wp->w_redr_status = TRUE;
+            if (!is_stl_global && W_ENDROW(wp) + wp->w_status_height <= msg_scrolled) {
+              wp->w_redr_status = true;
             }
           }
         }
+      }
+      if(is_stl_global && Rows - p_ch - 1 <= msg_scrolled) {
+        curwin->w_redr_status = true;
       }
       redraw_cmdline = true;
       redraw_tabline = true;
@@ -5244,7 +5251,7 @@ void win_redr_status_matches(expand_T *xp, int num_matches, char_u **matches, in
         // Create status line if needed by setting 'laststatus' to 2.
         // Set 'winminheight' to zero to avoid that the window is
         // resized.
-        if (lastwin->w_status_height == 0) {
+        if (lastwin->w_status_height == 0 && global_stl_height() == 0) {
           save_p_ls = p_ls;
           save_p_wmh = p_wmh;
           p_ls = 2;
@@ -5280,11 +5287,14 @@ void win_redr_status_matches(expand_T *xp, int num_matches, char_u **matches, in
 static void win_redr_status(win_T *wp)
 {
   int row;
+  int col;
   char_u *p;
   int len;
   int fillchar;
   int attr;
+  int width;
   int this_ru_col;
+  bool is_stl_global = global_stl_height() > 0;
   static int busy = FALSE;
 
   // May get here recursively when 'statusline' (indirectly)
@@ -5297,8 +5307,8 @@ static void win_redr_status(win_T *wp)
   busy = true;
 
   wp->w_redr_status = FALSE;
-  if (wp->w_status_height == 0) {
-    // no status line, can only be last window
+  if (wp->w_status_height == 0 && !(is_stl_global && wp == curwin)) {
+    // no status line, either global statusline is enabled or the window is a last window
     redraw_cmdline = true;
   } else if (!redrawing()) {
     // Don't redraw right now, do it later. Don't update status line when
@@ -5309,6 +5319,7 @@ static void win_redr_status(win_T *wp)
     redraw_custom_statusline(wp);
   } else {
     fillchar = fillchar_status(&attr, wp);
+    width = is_stl_global ? Columns : wp->w_width;
 
     get_trans_bufname(wp->w_buffer);
     p = NameBuff;
@@ -5337,9 +5348,9 @@ static void win_redr_status(win_T *wp)
       // len += (int)STRLEN(p + len);  // dead assignment
     }
 
-    this_ru_col = ru_col - (Columns - wp->w_width);
-    if (this_ru_col < (wp->w_width + 1) / 2) {
-      this_ru_col = (wp->w_width + 1) / 2;
+    this_ru_col = ru_col - (Columns - width);
+    if (this_ru_col < (width + 1) / 2) {
+      this_ru_col = (width + 1) / 2;
     }
     if (this_ru_col <= 1) {
       p = (char_u *)"<";                // No room for file name!
@@ -5364,10 +5375,11 @@ static void win_redr_status(win_T *wp)
       }
     }
 
-    row = W_ENDROW(wp);
-    grid_puts(&default_grid, p, row, wp->w_wincol, attr);
-    grid_fill(&default_grid, row, row + 1, len + wp->w_wincol,
-              this_ru_col + wp->w_wincol, fillchar, fillchar, attr);
+    row = is_stl_global ? (Rows - p_ch - 1) : W_ENDROW(wp);
+    col = is_stl_global ? 0 : wp->w_wincol;
+    grid_puts(&default_grid, p, row, col, attr);
+    grid_fill(&default_grid, row, row + 1, len + col,
+              this_ru_col + col, fillchar, fillchar, attr);
 
     if (get_keymap_str(wp, (char_u *)"<%s>", NameBuff, MAXPATHL)
         && this_ru_col - len > (int)(STRLEN(NameBuff) + 1)) {
@@ -5512,6 +5524,7 @@ static void win_redr_custom(win_T *wp, bool draw_ruler)
   int use_sandbox = false;
   win_T *ewp;
   int p_crb_save;
+  bool is_stl_global = global_stl_height() > 0;
 
   ScreenGrid *grid = &default_grid;
 
@@ -5533,9 +5546,9 @@ static void win_redr_custom(win_T *wp, bool draw_ruler)
     maxwidth = Columns;
     use_sandbox = was_set_insecurely(wp, "tabline", 0);
   } else {
-    row = W_ENDROW(wp);
+    row = is_stl_global ? (Rows - p_ch - 1) : W_ENDROW(wp);
     fillchar = fillchar_status(&attr, wp);
-    maxwidth = wp->w_width;
+    maxwidth = is_stl_global ? Columns : wp->w_width;
 
     if (draw_ruler) {
       stl = p_ruf;
@@ -5553,12 +5566,12 @@ static void win_redr_custom(win_T *wp, bool draw_ruler)
           stl = p_ruf;
         }
       }
-      col = ru_col - (Columns - wp->w_width);
-      if (col < (wp->w_width + 1) / 2) {
-        col = (wp->w_width + 1) / 2;
+      col = ru_col - (Columns - maxwidth);
+      if (col < (maxwidth + 1) / 2) {
+        col = (maxwidth + 1) / 2;
       }
-      maxwidth = wp->w_width - col;
-      if (!wp->w_status_height) {
+      maxwidth = maxwidth - col;
+      if (!wp->w_status_height && !is_stl_global) {
         grid = &msg_grid_adj;
         row = Rows - 1;
         maxwidth--;  // writing in last column may cause scrolling
@@ -5576,7 +5589,7 @@ static void win_redr_custom(win_T *wp, bool draw_ruler)
       use_sandbox = was_set_insecurely(wp, "statusline", *wp->w_p_stl == NUL ? 0 : OPT_LOCAL);
     }
 
-    col += wp->w_wincol;
+    col += is_stl_global ? 0 : wp->w_wincol;
   }
 
   if (maxwidth <= 0) {
@@ -7158,10 +7171,10 @@ int showmode(void)
     clear_showcmd();
   }
 
-  // If the last window has no status line, the ruler is after the mode
-  // message and must be redrawn
+  // If the last window has no status line and global statusline is disabled,
+  // the ruler is after the mode message and must be redrawn
   win_T *last = lastwin_nofloating();
-  if (redrawing() && last->w_status_height == 0) {
+  if (redrawing() && last->w_status_height == 0 && global_stl_height() == 0) {
     win_redr_ruler(last, true);
   }
   redraw_cmdline = false;
@@ -7511,7 +7524,8 @@ void showruler(bool always)
   if (!always && !redrawing()) {
     return;
   }
-  if ((*p_stl != NUL || *curwin->w_p_stl != NUL) && curwin->w_status_height) {
+  if ((*p_stl != NUL || *curwin->w_p_stl != NUL)
+      && (curwin->w_status_height || global_stl_height())) {
     redraw_custom_statusline(curwin);
   } else {
     win_redr_ruler(curwin, always);
@@ -7530,6 +7544,7 @@ void showruler(bool always)
 
 static void win_redr_ruler(win_T *wp, bool always)
 {
+  bool is_stl_global = global_stl_height() > 0;
   static bool did_show_ext_ruler = false;
 
   // If 'ruler' off or redrawing disabled, don't do anything
@@ -7547,7 +7562,7 @@ static void win_redr_ruler(win_T *wp, bool always)
 
   // Don't draw the ruler while doing insert-completion, it might overwrite
   // the (long) mode message.
-  if (wp == lastwin && lastwin->w_status_height == 0) {
+  if (wp == lastwin && lastwin->w_status_height == 0 && !is_stl_global) {
     if (edit_submode != NULL) {
       return;
     }
@@ -7602,6 +7617,12 @@ static void win_redr_ruler(win_T *wp, bool always)
       off = wp->w_wincol;
       width = wp->w_width;
       part_of_status = true;
+    } else if (is_stl_global) {
+      row = Rows - p_ch - 1;
+      fillchar = fillchar_status(&attr, wp);
+      off = 0;
+      width = Columns;
+      part_of_status = true;
     } else {
       row = Rows - 1;
       fillchar = ' ';
@@ -7641,7 +7662,7 @@ static void win_redr_ruler(win_T *wp, bool always)
     int i = (int)STRLEN(buffer);
     get_rel_pos(wp, buffer + i + 1, RULER_BUF_LEN - i - 1);
     int o = i + vim_strsize(buffer + i + 1);
-    if (wp->w_status_height == 0) {  // can't use last char of screen
+    if (wp->w_status_height == 0 && !is_stl_global) {  // can't use last char of screen
       o++;
     }
     int this_ru_col = ru_col - (Columns - width);
