@@ -3727,7 +3727,7 @@ static int win_alloc_firstwin(win_T *oldwin)
   new_frame(curwin);
   topframe = curwin->w_frame;
   topframe->fr_width = Columns;
-  topframe->fr_height = Rows - p_ch;
+  topframe->fr_height = Rows - p_ch - global_stl_height();
 
   return OK;
 }
@@ -6371,28 +6371,36 @@ static void last_status_rec(frame_T *fr, bool statusline, bool is_stl_global, bo
       if (wp->w_status_height != 0 && (!statusline || is_stl_global)) {
         // Remove status line, but don't resize window if global statusline is enabled
         // since that space will be used by the global statusline
-        if(!is_stl_global) {
-          win_new_height(wp, wp->w_height + 1);
-        }
         wp->w_status_height = 0;
         comp_col();
-      } else if (wp->w_status_height == 0 && (statusline 
-                 || (is_stl_global && wp->w_winrow + wp->w_height >= Rows - p_ch))) {
-        if (!is_stl_global) {
-          wp->w_status_height = 1;
-          comp_col();
-        }
-        if (wp->w_winrow + wp->w_height >= Rows - p_ch) {
-          resize_frame_for_status(fr, is_stl_global);
+        if(!is_stl_global) {
+          win_new_height(wp, wp->w_height + 1);
+        } else {
+          frame_new_height(wp->w_frame, wp->w_height, false, false);
+          frame_fix_height(wp);
+          (void)win_comp_pos();
           redraw_all_later(SOME_VALID);
         }
+      } else if (wp->w_status_height == 0 && statusline) {
+        if (wp->w_winrow + wp->w_height < Rows - p_ch - 1) {
+          frame_new_height(wp->w_frame, wp->w_height + 1, false, false);
+          frame_fix_height(wp);
+          (void)win_comp_pos();
+          redraw_all_later(SOME_VALID);
+        }
+        wp->w_status_height = 1;
+        comp_col();
+      } else if (wp->w_status_height == 0 && is_stl_global 
+                 && wp->w_winrow + wp->w_height > Rows - p_ch - 1) {
+        resize_frame_for_status(fr, is_stl_global);
+        redraw_all_later(SOME_VALID);
       }
     } else if (wp->w_status_height != 0 && is_stl_global) {
       win_new_height(wp, wp->w_height + 1);
       wp->w_status_height = 0;
       comp_col();
     } else if (wp->w_status_height == 0 && !is_stl_global) {
-      resize_frame_for_status(fr, is_stl_global);
+      win_new_height(wp, wp->w_height - 1);
       wp->w_status_height = 1;
       comp_col();
       redraw_all_later(SOME_VALID);
