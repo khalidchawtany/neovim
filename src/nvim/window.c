@@ -6376,42 +6376,51 @@ static void last_status_rec(frame_T *fr, bool statusline, bool is_stl_global, bo
         if(!is_stl_global) {
           win_new_height(wp, wp->w_height + 1);
         } else {
-          frame_new_height(wp->w_frame, wp->w_height, false, false);
+          frame_new_height(fr, wp->w_height, false, false);
           (void)win_comp_pos();
-          redraw_all_later(SOME_VALID);
         }
       } else if (wp->w_status_height == 0 && !is_stl_global) {
-        if (wp->w_winrow + wp->w_height <= Rows - p_ch - 1) {
-          frame_new_height(wp->w_frame, wp->w_height + 1, false, false);
+        // Check if last window covers all space until the global statusline (if there is one)
+        // If not, resize i. Use frame height instead of window height for the check
+        // since height of topframe's window is 0 after initialization
+        if (wp->w_winrow + fr->fr_height <= Rows - p_ch - global_stl_height()) {
+          frame_new_height(fr, wp->w_height + 1, false, false);
           (void)win_comp_pos();
-          redraw_all_later(SOME_VALID);
-        }      
+        }
+        // Add statusline if needed
         if (statusline) {
-          win_new_height(wp, wp->w_height - 1);
           wp->w_status_height = 1;
+          resize_frame_for_status(fr, is_stl_global);
           comp_col();
-          redraw_all_later(SOME_VALID);
         }
       } else if (wp->w_status_height == 0 && is_stl_global 
-                 && wp->w_winrow + wp->w_height > Rows - p_ch - 1) {
+                 && wp->w_winrow + fr->fr_height > Rows - p_ch - 1) {
+        // If window takes up space required by the global statusline, decrease the frame height
         resize_frame_for_status(fr, is_stl_global);
-        redraw_all_later(SOME_VALID);
       }
+      redraw_all_later(SOME_VALID);
     } else if (wp->w_status_height != 0 && is_stl_global) {
+      // If statusline is global and the window has a statusline, remove it
       win_new_height(wp, wp->w_height + 1);
       wp->w_status_height = 0;
       comp_col();
     } else if (wp->w_status_height == 0 && !is_stl_global) {
-      resize_frame_for_status(fr, is_stl_global);
+      // If statusline isn't global and the window doesn't have a statusline, re-add it
       wp->w_status_height = 1;
+      resize_frame_for_status(fr, is_stl_global);
       comp_col();
       redraw_all_later(SOME_VALID);
     } 
   } else if (fr->fr_layout == FR_COL) {
+    // For a column frame, recursively call this function for all child frames
+    // Determine if the child frame contains a last window by checking
+    // whether next frame of child is NULL
     FOR_ALL_FRAMES(fp, fr->fr_child) {
       last_status_rec(fp, statusline, is_stl_global, fp->fr_next == NULL);
     }
   } else {
+    // For a row frame, recursively call this function for all child frames
+    // Determine if the child frame contains a last window by checking whether it's a leaf frame
     FOR_ALL_FRAMES(fp, fr->fr_child) {
       last_status_rec(fp, statusline, is_stl_global, fp->fr_layout == FR_LEAF);
     }
