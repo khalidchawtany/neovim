@@ -2122,7 +2122,7 @@ static void win_equal_rec(win_T *next_curwin, bool current, frame_T *topfr, int 
       } else {
         extra_sep = 0;
       }
-      totwincount = (n + extra_sep) / (p_wmh + 1);
+      totwincount = (n + extra_sep) / (p_wmh + STATUS_HEIGHT - global_stl_height());
       has_next_curwin = frame_has_win(topfr, next_curwin);
 
       /*
@@ -2157,7 +2157,7 @@ static void win_equal_rec(win_T *next_curwin, bool current, frame_T *topfr, int 
           } else {
             // These windows don't use up room.
             totwincount -= (n + (fr->fr_next == NULL
-                                 ? extra_sep : 0)) / (p_wmh + 1);
+                                 ? extra_sep : 0)) / (p_wmh + STATUS_HEIGHT - global_stl_height());
           }
           room -= new_size - n;
           if (room < 0) {
@@ -2203,7 +2203,7 @@ static void win_equal_rec(win_T *next_curwin, bool current, frame_T *topfr, int 
         // Compute the maximum number of windows vert. in "fr".
         n = frame_minheight(fr, NOWIN);
         wincount = (n + (fr->fr_next == NULL ? extra_sep : 0))
-                   / (p_wmh + 1);
+                   / (p_wmh + STATUS_HEIGHT - global_stl_height());
         m = frame_minheight(fr, next_curwin);
         if (has_next_curwin) {
           hnc = frame_has_win(fr, next_curwin);
