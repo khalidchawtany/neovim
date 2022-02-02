@@ -3145,7 +3145,7 @@ static bool frame_has_win(const frame_T *frp, const win_T *wp)
 /// @param topfirst  resize topmost contained frame first.
 /// @param wfh       obey 'winfixheight' when there is a choice;
 ///                  may cause the height not to be set.
-static void frame_new_height(frame_T *topfrp, int height, bool topfirst, bool wfh)
+void frame_new_height(frame_T *topfrp, int height, bool topfirst, bool wfh)
   FUNC_ATTR_NONNULL_ALL
 {
   frame_T *frp;
@@ -6369,34 +6369,25 @@ static void last_status_rec(frame_T *fr, bool statusline, bool is_stl_global, bo
 
     if (is_last) {
       if (wp->w_status_height != 0 && (!statusline || is_stl_global)) {
-        // Remove status line, but don't resize window if global statusline is enabled
-        // since that space will be used by the global statusline
+        // Remove status line
         wp->w_status_height = 0;
+        win_new_height(wp, wp->w_height + 1);
+        // If space required by the global statusline is taken, decrease topframe height
+        if (is_stl_global && tabline_height() + topframe->fr_height > Rows - p_ch - 1) {
+          frame_new_height(topframe, topframe->fr_height - 1, false, false);
+          (void)win_comp_pos();
+        }
         comp_col();
-        if(!is_stl_global) {
-          win_new_height(wp, wp->w_height + 1);
-        } else {
-          frame_new_height(fr, wp->w_height, false, false);
-          (void)win_comp_pos();
-        }
-      } else if (wp->w_status_height == 0 && !is_stl_global) {
-        // Check if last window covers all space until the global statusline (if there is one)
-        // If not, resize i. Use frame height instead of window height for the check
-        // since height of topframe's window is 0 after initialization
-        if (wp->w_winrow + fr->fr_height < Rows - p_ch - global_stl_height()) {
-          frame_new_height(fr, wp->w_height + 1, false, false);
-          (void)win_comp_pos();
-        }
-        // Add statusline if needed
-        if (statusline) {
-          wp->w_status_height = 1;
-          resize_frame_for_status(fr, is_stl_global);
-          comp_col();
-        }
-      } else if (wp->w_status_height == 0 && is_stl_global 
-                 && wp->w_winrow + fr->fr_height > Rows - p_ch - 1) {
-        // If window takes up space required by the global statusline, decrease the frame height
+      } else if (wp->w_status_height == 0 && !is_stl_global && statusline) {
+        // Add statusline to window if needed
+        wp->w_status_height = 1;
         resize_frame_for_status(fr, is_stl_global);
+        comp_col();
+      } else if (wp->w_status_height == 0 && is_stl_global 
+                 && tabline_height() + topframe->fr_height > Rows - p_ch - 1) {
+        // If space required by the global statusline is taken, decrease topframe height
+        frame_new_height(topframe, topframe->fr_height - 1, false, false);
+        (void)win_comp_pos();
       }
       redraw_all_later(SOME_VALID);
     } else if (wp->w_status_height != 0 && is_stl_global) {

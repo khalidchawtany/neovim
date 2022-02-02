@@ -4475,6 +4475,16 @@ static char *set_num_option(int opt_idx, char_u *varp, long value, char *errbuf,
     // 'winminwidth'
     win_setminwidth();
   } else if (pp == &p_ls) {
+    // If global statusline was previously enabled, clear the screen
+    // Also increase height of topframe by 1 if necessary
+    if (old_value == 3 && value != 3) {
+      redraw_all_later(CLEAR);
+      if (tabline_height() + topframe->fr_height == Rows - p_ch - 1) {
+        frame_new_height(topframe, topframe->fr_height + 1, false, false);
+        (void)win_comp_pos();
+      }
+    }
+
     last_status(false);  // (re)set last window status line.
   } else if (pp == &p_stal) {
     // (re)set tab page line
