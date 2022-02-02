@@ -6383,7 +6383,7 @@ static void last_status_rec(frame_T *fr, bool statusline, bool is_stl_global, bo
         // Check if last window covers all space until the global statusline (if there is one)
         // If not, resize i. Use frame height instead of window height for the check
         // since height of topframe's window is 0 after initialization
-        if (wp->w_winrow + fr->fr_height <= Rows - p_ch - global_stl_height()) {
+        if (wp->w_winrow + fr->fr_height < Rows - p_ch - global_stl_height()) {
           frame_new_height(fr, wp->w_height + 1, false, false);
           (void)win_comp_pos();
         }
