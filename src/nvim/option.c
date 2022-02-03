@@ -4479,8 +4479,8 @@ static char *set_num_option(int opt_idx, char_u *varp, long value, char *errbuf,
     // Also increase height of topframe by 1 if necessary
     if (old_value == 3 && value != 3) {
       redraw_all_later(CLEAR);
-      if (tabline_height() + topframe->fr_height == Rows - p_ch - 1) {
-        frame_new_height(topframe, topframe->fr_height + 1, false, false);
+      if (tabline_height() + topframe->fr_height == Rows - p_ch - STATUS_HEIGHT) {
+        frame_new_height(topframe, topframe->fr_height + STATUS_HEIGHT, false, false);
         (void)win_comp_pos();
       }
     }
