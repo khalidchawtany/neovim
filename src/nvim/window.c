@@ -6418,7 +6418,7 @@ void last_status(bool morewin)
 {
   // Don't make a difference between horizontal or vertical split.
   last_status_rec(topframe, (p_ls == 2 || (p_ls == 1 && (morewin || !one_window()))),
-                            global_stl_height() > 0, topframe->fr_layout == FR_LEAF);
+                  global_stl_height() > 0);
 }
 
 // Find a resizable frame and take a line from it to make room for the statusline
@@ -6454,13 +6454,24 @@ static void resize_frame_for_status(frame_T *fr, bool is_stl_global, bool is_las
   }
 }
 
-static void last_status_rec(frame_T *fr, bool statusline, bool is_stl_global, bool is_last)
+static void last_status_rec(frame_T *fr, bool statusline, bool is_stl_global)
 {
   frame_T *fp;
   win_T *wp;
+  frame_T *frp;
+  bool is_last;
 
   if (fr->fr_layout == FR_LEAF) {
     wp = fr->fr_win;
+    
+    // Find out if there are any windows below this one.
+    for (frp = fr; frp->fr_parent != NULL; frp = frp->fr_parent) {
+      if (frp->fr_parent->fr_layout == FR_COL && frp->fr_next != NULL) {
+        break;
+      }
+    }
+
+    is_last = (frp->fr_parent == NULL);
 
     if (is_last) {
       if (wp->w_status_height != 0 && (!statusline || is_stl_global)) {
@@ -6506,13 +6517,13 @@ static void last_status_rec(frame_T *fr, bool statusline, bool is_stl_global, bo
     // Determine if the child frame contains a last window by checking
     // whether next frame of child is NULL
     FOR_ALL_FRAMES(fp, fr->fr_child) {
-      last_status_rec(fp, statusline, is_stl_global, fp->fr_next == NULL);
+      last_status_rec(fp, statusline, is_stl_global);
     }
   } else {
     // For a row frame, recursively call this function for all child frames
     // Determine if the child frame contains a last window by checking whether it's a leaf frame
     FOR_ALL_FRAMES(fp, fr->fr_child) {
-      last_status_rec(fp, statusline, is_stl_global, fp->fr_layout == FR_LEAF);
+      last_status_rec(fp, statusline, is_stl_global);
     }
   }
 }
