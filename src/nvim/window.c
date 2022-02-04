@@ -6514,14 +6514,11 @@ static void last_status_rec(frame_T *fr, bool statusline, bool is_stl_global)
     redraw_all_later(SOME_VALID);
   } else if (fr->fr_layout == FR_COL) {
     // For a column frame, recursively call this function for all child frames
-    // Determine if the child frame contains a last window by checking
-    // whether next frame of child is NULL
     FOR_ALL_FRAMES(fp, fr->fr_child) {
       last_status_rec(fp, statusline, is_stl_global);
     }
   } else {
     // For a row frame, recursively call this function for all child frames
-    // Determine if the child frame contains a last window by checking whether it's a leaf frame
     FOR_ALL_FRAMES(fp, fr->fr_child) {
       last_status_rec(fp, statusline, is_stl_global);
     }
