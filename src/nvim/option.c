@@ -3554,16 +3554,17 @@ static char *set_chars_option(win_T *wp, char_u **varp, bool set)
   struct chars_tab *tab;
 
   struct chars_tab fcs_tab[] = {
-    { &wp->w_p_fcs_chars.stl,     "stl",      ' '  },
-    { &wp->w_p_fcs_chars.stlnc,   "stlnc",    ' '  },
-    { &wp->w_p_fcs_chars.vert,    "vert",     9474 },  // │
-    { &wp->w_p_fcs_chars.fold,    "fold",     183  },  // ·
+    { &wp->w_p_fcs_chars.stl,        "stl",       ' '  },
+    { &wp->w_p_fcs_chars.stlnc,      "stlnc",     ' '  },
+    { &wp->w_p_fcs_chars.horiz,      "horiz",     9472 },  // ─
+    { &wp->w_p_fcs_chars.vert,       "vert",      9474 },  // │
+    { &wp->w_p_fcs_chars.fold,       "fold",      183  },  // ·
     { &wp->w_p_fcs_chars.foldopen,   "foldopen",  '-'  },
     { &wp->w_p_fcs_chars.foldclosed, "foldclose", '+'  },
     { &wp->w_p_fcs_chars.foldsep,    "foldsep",   9474 },  // │
-    { &wp->w_p_fcs_chars.diff,    "diff",     '-'  },
-    { &wp->w_p_fcs_chars.msgsep,  "msgsep",   ' '  },
-    { &wp->w_p_fcs_chars.eob,     "eob",      '~'  },
+    { &wp->w_p_fcs_chars.diff,       "diff",      '-'  },
+    { &wp->w_p_fcs_chars.msgsep,     "msgsep",    ' '  },
+    { &wp->w_p_fcs_chars.eob,        "eob",       '~'  },
   };
   struct chars_tab lcs_tab[] = {
     { &wp->w_p_lcs_chars.eol,     "eol",      NUL  },
@@ -3590,15 +3591,12 @@ static char *set_chars_option(win_T *wp, char_u **varp, bool set)
       varp = &p_fcs;
     }
     if (*p_ambw == 'd') {
-      // XXX: If ambiwidth=double then "|" and "·" take 2 columns, which is
-      // forbidden (TUI limitation?). Set old defaults.
-      fcs_tab[2].def = '|';
-      fcs_tab[6].def = '|';
-      fcs_tab[3].def = '-';
-    } else {
-      fcs_tab[2].def = 9474;  // │
-      fcs_tab[6].def = 9474;  // │
-      fcs_tab[3].def = 183;   // ·
+      // XXX: If ambiwidth=double then "·", "─", "│" take 2 columns, 
+      // which is forbidden (TUI limitation?). Set old defaults.
+      fcs_tab[2].def = '-'; // horiz
+      fcs_tab[3].def = '|'; // vert
+      fcs_tab[4].def = '-'; // fold
+      fcs_tab[7].def = '|'; // foldsep
     }
   }
 

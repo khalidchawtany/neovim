@@ -810,8 +810,10 @@ static void win_update(win_T *wp, Providers *providers)
     wp->w_lines_valid = 0;
   }
 
-  // Window is zero-height: nothing to draw.
+  // Window is zero-height: Only need to draw the separator
   if (wp->w_grid.Rows == 0) {
+    // draw the horizontal separator below this window
+    draw_hsep_win(wp, 0);
     wp->w_redr_type = 0;
     return;
   }
@@ -1755,6 +1757,7 @@ static void win_update(win_T *wp, Providers *providers)
 
   if (wp->w_redr_type >= REDRAW_TOP) {
     draw_vsep_win(wp, 0);
+    draw_hsep_win(wp, 0);
   }
   syn_set_timeout(NULL);
 
@@ -4969,10 +4972,15 @@ void rl_mirror(char_u *str)
  */
 void status_redraw_all(void)
 {
-  FOR_ALL_WINDOWS_IN_TAB(wp, curtab) {
-    if (wp->w_status_height) {
-      wp->w_redr_status = true;
-      redraw_later(wp, VALID);
+  if (global_stl_height()) {
+    curwin->w_redr_status = true;
+    redraw_later(curwin, VALID);
+  } else {
+    FOR_ALL_WINDOWS_IN_TAB(wp, curtab) {
+      if (wp->w_status_height) {
+        wp->w_redr_status = true;
+        redraw_later(wp, VALID);
+      }
     }
   }
 }
@@ -4986,10 +4994,15 @@ void status_redraw_curbuf(void)
 /// Marks all status lines of the specified buffer for redraw.
 void status_redraw_buf(buf_T *buf)
 {
-  FOR_ALL_WINDOWS_IN_TAB(wp, curtab) {
-    if (wp->w_status_height != 0 && wp->w_buffer == buf) {
-      wp->w_redr_status = true;
-      redraw_later(wp, VALID);
+  if (global_stl_height() != 0 && curwin->w_buffer == buf) {
+    curwin->w_redr_status = true;
+    redraw_later(curwin, VALID);
+  } else {
+    FOR_ALL_WINDOWS_IN_TAB(wp, curtab) {
+      if (wp->w_status_height != 0 && wp->w_buffer == buf) {
+        wp->w_redr_status = true;
+        redraw_later(wp, VALID);
+      }
     }
   }
 }
@@ -5032,7 +5045,7 @@ void win_redraw_last_status(const frame_T *frp)
 }
 
 /*
- * Draw the verticap separator right of window "wp" starting with line "row".
+ * Draw the vertical separator right of window "wp" starting with line "row".
  */
 static void draw_vsep_win(win_T *wp, int row)
 {
@@ -5047,6 +5060,21 @@ static void draw_vsep_win(win_T *wp, int row)
   }
 }
 
+/*
+ * Draw the horizontal separator below window "wp" starting with column "col".
+ */
+static void draw_hsep_win(win_T *wp, int col)
+{
+  int hl;
+  int c; // Horizontal separator character
+
+  if (wp->w_hsep_height) {
+    // draw the horizontal separator below this window
+    c = fillchar_hsep(wp, &hl);
+    grid_fill(&default_grid, W_ENDROW(wp), W_ENDROW(wp) + 1,
+              wp->w_wincol + col, W_ENDCOL(wp), c, c, hl);
+  }
+}
 
 /*
  * Get the length of an item as it will be shown in the status line.
@@ -7497,6 +7525,16 @@ static int fillchar_vsep(win_T *wp, int *attr)
 {
   *attr = win_hl_attr(wp, HLF_C);
   return wp->w_p_fcs_chars.vert;
+}
+
+/*
+ * Get the character to use in a separator between horizontally split windows.
+ * Get its attributes in "*attr".
+ */
+static int fillchar_hsep(win_T *wp, int *attr)
+{
+  *attr = win_hl_attr(wp, HLF_C);
+  return wp->w_p_fcs_chars.horiz;
 }
 
 /*

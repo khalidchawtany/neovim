@@ -227,9 +227,10 @@ Options:
   'cpoptions'   flags: |cpo-_|
   'display'     flags: "msgsep" minimizes scrolling when showing messages
   'guicursor'   works in the terminal
-  'fillchars'   flags: "msgsep" (see 'display')
+  'fillchars'   flags: "msgsep" (see 'display'), "horiz"
   'foldcolumn'  supports up to 9 dynamic/fixed columns
   'inccommand'  shows interactive results for |:substitute|-like commands
+  'laststatus'  global statusline support
   'pumblend'    pseudo-transparent popupmenu
   'scrollback'
   'signcolumn'  supports up to 9 dynamic/fixed columns

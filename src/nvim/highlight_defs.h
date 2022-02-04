@@ -70,7 +70,7 @@ typedef enum {
   HLF_R,          // return to continue message and yes/no questions
   HLF_S,          // status lines
   HLF_SNC,        // status lines of not-current windows
-  HLF_C,          // column to separate vertically split windows
+  HLF_C,          // window split separators
   HLF_T,          // Titles for output from ":set all", ":autocmd" etc.
   HLF_V,          // Visual mode
   HLF_VNC,        // Visual mode, autoselecting and not clipboard owner

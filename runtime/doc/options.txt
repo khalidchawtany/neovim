@@ -2441,6 +2441,7 @@ A jump table for the options with a short description can be found at |Q_op|.
 	  item		default		Used for ~
 	  stl:c		' ' or '^'	statusline of the current window
 	  stlnc:c	' ' or '='	statusline of the non-current windows
+	  horiz:c	'─' or '-'      horizontal separators |:split|
 	  vert:c	'│' or '|'	vertical separators |:vsplit|
 	  fold:c	'·' or '-'	filling 'foldtext'
 	  foldopen:c	'-'		mark the beginning of a fold
@@ -2454,8 +2455,8 @@ A jump table for the options with a short description can be found at |Q_op|.
 	"stlnc" the space will be used when there is highlighting, '^' or '='
 	otherwise.
 
-	If 'ambiwidth' is "double" then "vert", "foldsep" and "fold" default to
-	single-byte alternatives.
+	If 'ambiwidth' is "double" then "horiz", "vert", "foldsep" and "fold"
+	default to single-byte alternatives.
 
 	Example: >
 	    :set fillchars=stl:^,stlnc:=,vert:│,fold:·,diff:-
@@ -2469,6 +2470,7 @@ A jump table for the options with a short description can be found at |Q_op|.
 	  item		highlight group ~
 	  stl:c		StatusLine		|hl-StatusLine|
 	  stlnc:c	StatusLineNC		|hl-StatusLineNC|
+	  horiz:c	VertSplit		|hl-VertSplit|
 	  vert:c	VertSplit		|hl-VertSplit|
 	  fold:c	Folded			|hl-Folded|
 	  diff:c	DiffDelete		|hl-DiffDelete|
