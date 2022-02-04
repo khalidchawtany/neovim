@@ -3185,6 +3185,20 @@ static bool frame_has_win(const frame_T *frp, const win_T *wp)
   return false;
 }
 
+/// Check if current window is at the bottom
+/// Returns true if there are no windows below current window
+static bool is_bottom_win(win_T *wp)
+  FUNC_ATTR_PURE FUNC_ATTR_WARN_UNUSED_RESULT FUNC_ATTR_NONNULL_ALL
+{
+  frame_T *frp;
+  for (frp = wp->w_frame; frp->fr_parent != NULL; frp = frp->fr_parent) {
+    if (frp->fr_parent->fr_layout == FR_COL && frp->fr_next != NULL) {
+      break;
+    }
+  }
+  return frp->fr_parent == NULL;
+}
+
 /// Set a new height for a frame.  Recursively sets the height for contained
 /// frames and windows.  Caller must take care of positions.
 ///
@@ -3202,13 +3216,7 @@ void frame_new_height(frame_T *topfrp, int height, bool topfirst, bool wfh)
   if (topfrp->fr_win != NULL) {
     // Simple case: just one window.
     wp = topfrp->fr_win;
-    // Find out if there are any windows below this one.
-    for (frp = topfrp; frp->fr_parent != NULL; frp = frp->fr_parent) {
-      if (frp->fr_parent->fr_layout == FR_COL && frp->fr_next != NULL) {
-        break;
-      }
-    }
-    if (frp->fr_parent == NULL) {
+    if (is_bottom_win(wp)) {
       wp->w_hsep_height = 0;
     }
     win_new_height(wp, height - wp->w_hsep_height - wp->w_status_height);
@@ -6458,21 +6466,11 @@ static void last_status_rec(frame_T *fr, bool statusline, bool is_stl_global)
 {
   frame_T *fp;
   win_T *wp;
-  frame_T *frp;
-  bool is_last;
 
   if (fr->fr_layout == FR_LEAF) {
     wp = fr->fr_win;
+    bool is_last = is_bottom_win(wp);
     
-    // Find out if there are any windows below this one.
-    for (frp = fr; frp->fr_parent != NULL; frp = frp->fr_parent) {
-      if (frp->fr_parent->fr_layout == FR_COL && frp->fr_next != NULL) {
-        break;
-      }
-    }
-
-    is_last = (frp->fr_parent == NULL);
-
     if (is_last) {
       if (wp->w_status_height != 0 && (!statusline || is_stl_global)) {
         // Remove status line
