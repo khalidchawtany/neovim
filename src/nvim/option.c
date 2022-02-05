@@ -3596,17 +3596,17 @@ static char *set_chars_option(win_T *wp, char_u **varp, bool set)
       varp = &p_fcs;
     }
     if (*p_ambw == 'd') {
-      // XXX: If ambiwidth=double then some characters take 2 columns, 
+      // XXX: If ambiwidth=double then some characters take 2 columns,
       // which is forbidden (TUI limitation?). Set old defaults.
-      fcs_tab[2].def  = '-'; // horiz
-      fcs_tab[3].def  = '-'; // horizup
-      fcs_tab[4].def  = '-'; // horizdown
-      fcs_tab[5].def  = '|'; // vert
-      fcs_tab[6].def  = '|'; // vertleft
-      fcs_tab[7].def  = '|'; // vertright
-      fcs_tab[8].def  = '+'; // verthoriz
-      fcs_tab[9].def  = '-'; // fold
-      fcs_tab[12].def = '|'; // foldsep
+      fcs_tab[2].def  = '-';
+      fcs_tab[3].def  = '-';
+      fcs_tab[4].def  = '-';
+      fcs_tab[5].def  = '|';
+      fcs_tab[6].def  = '|';
+      fcs_tab[7].def  = '|';
+      fcs_tab[8].def  = '+';
+      fcs_tab[9].def  = '-';
+      fcs_tab[12].def = '|';
     }
   }
 

@@ -453,7 +453,7 @@ int update_screen(int type)
           }
         }
       }
-      if(is_stl_global && Rows - p_ch - 1 <= msg_scrolled) {
+      if (is_stl_global && Rows - p_ch - 1 <= msg_scrolled) {
         curwin->w_redr_status = true;
       }
       redraw_cmdline = true;
@@ -5047,9 +5047,7 @@ void win_redraw_last_status(const frame_T *frp)
   }
 }
 
-/*
- * Draw the vertical separator right of window "wp"
- */
+/// Draw the vertical separator right of window "wp"
 static void draw_vsep_win(win_T *wp)
 {
   int hl;
@@ -5063,13 +5061,11 @@ static void draw_vsep_win(win_T *wp)
   }
 }
 
-/*
- * Draw the horizontal separator below window "wp"
- */
+/// Draw the horizontal separator below window "wp"
 static void draw_hsep_win(win_T *wp)
 {
   int hl;
-  int c; // Horizontal separator character
+  int c;
 
   if (wp->w_hsep_height) {
     // draw the horizontal separator below this window
@@ -5099,9 +5095,7 @@ static int get_corner_sep_connector(win_T *wp, WindowCorner corner)
   }
 }
 
-/*
- * Draw seperator connecting characters on the corners of window "wp"
- */
+/// Draw seperator connecting characters on the corners of window "wp"
 static void draw_sep_connectors_win(win_T *wp)
 {
   // Don't draw separator connectors unless global statusline is enabled and the window has
@@ -5151,9 +5145,8 @@ static void draw_sep_connectors_win(win_T *wp)
                  W_ENDROW(wp), W_ENDCOL(wp), hl);
   }
 }
-/*
- * Get the length of an item as it will be shown in the status line.
- */
+
+/// Get the length of an item as it will be shown in the status line.
 static int status_match_len(expand_T *xp, char_u *s)
 {
   int len = 0;
@@ -5398,7 +5391,7 @@ static void win_redr_status(win_T *wp)
   int width;
   int this_ru_col;
   bool is_stl_global = global_stl_height() > 0;
-  static int busy = FALSE;
+  static int busy = false;
 
   // May get here recursively when 'statusline' (indirectly)
   // invokes ":redrawstatus".  Simply ignore the call then.
@@ -5409,7 +5402,7 @@ static void win_redr_status(win_T *wp)
   }
   busy = true;
 
-  wp->w_redr_status = FALSE;
+  wp->w_redr_status = false;
   if (wp->w_status_height == 0 && !(is_stl_global && wp == curwin)) {
     // no status line, either global statusline is enabled or the window is a last window
     redraw_cmdline = true;
@@ -5564,13 +5557,14 @@ bool stl_connected(win_T *wp)
 /// Check if horizontal separator of window "wp" at specified window corner is connected to the
 /// horizontal separator of another window
 /// Assumes global statusline is enabled
-static bool hsep_connected(win_T *wp, WindowCorner corner) {
+static bool hsep_connected(win_T *wp, WindowCorner corner)
+{
   bool before = (corner == WC_TOP_LEFT || corner == WC_BOTTOM_LEFT);
   int sep_row = (corner == WC_TOP_LEFT || corner == WC_TOP_RIGHT)
                 ? wp->w_winrow - 1 : W_ENDROW(wp);
   frame_T *fr = wp->w_frame;
 
-  while(fr->fr_parent != NULL) {
+  while (fr->fr_parent != NULL) {
     if (fr->fr_parent->fr_layout == FR_ROW && (before ? fr->fr_prev : fr->fr_next) != NULL) {
       fr = before ? fr->fr_prev : fr->fr_next;
       break;
@@ -5582,8 +5576,8 @@ static bool hsep_connected(win_T *wp, WindowCorner corner) {
   }
   while (fr->fr_layout != FR_LEAF) {
     fr = fr->fr_child;
-    if (fr->fr_parent->fr_layout == FR_ROW && before) { 
-      while(fr->fr_next != NULL) {
+    if (fr->fr_parent->fr_layout == FR_ROW && before) {
+      while (fr->fr_next != NULL) {
         fr = fr->fr_next;
       }
     } else {
@@ -5598,13 +5592,14 @@ static bool hsep_connected(win_T *wp, WindowCorner corner) {
 
 /// Check if vertical separator of window "wp" at specified window corner is connected to the
 /// vertical separator of another window
-static bool vsep_connected(win_T *wp, WindowCorner corner) {
+static bool vsep_connected(win_T *wp, WindowCorner corner)
+{
   bool before = (corner == WC_TOP_LEFT || corner == WC_TOP_RIGHT);
   int sep_col = (corner == WC_TOP_LEFT || corner == WC_BOTTOM_LEFT)
                 ? wp->w_wincol - 1 : W_ENDCOL(wp);
   frame_T *fr = wp->w_frame;
 
-  while(fr->fr_parent != NULL) {
+  while (fr->fr_parent != NULL) {
     if (fr->fr_parent->fr_layout == FR_COL && (before ? fr->fr_prev : fr->fr_next) != NULL) {
       fr = before ? fr->fr_prev : fr->fr_next;
       break;
@@ -5616,8 +5611,8 @@ static bool vsep_connected(win_T *wp, WindowCorner corner) {
   }
   while (fr->fr_layout != FR_LEAF) {
     fr = fr->fr_child;
-    if (fr->fr_parent->fr_layout == FR_COL && before) { 
-      while(fr->fr_next != NULL) {
+    if (fr->fr_parent->fr_layout == FR_COL && before) {
+      while (fr->fr_next != NULL) {
         fr = fr->fr_next;
       }
     } else {
@@ -7660,20 +7655,16 @@ int fillchar_status(int *attr, win_T *wp)
   return '=';
 }
 
-/*
- * Get the character to use in a separator between vertically split windows.
- * Get its attributes in "*attr".
- */
+/// Get the character to use in a separator between vertically split windows.
+/// Get its attributes in "*attr".
 static int fillchar_vsep(win_T *wp, int *attr)
 {
   *attr = win_hl_attr(wp, HLF_C);
   return wp->w_p_fcs_chars.vert;
 }
 
-/*
- * Get the character to use in a separator between horizontally split windows.
- * Get its attributes in "*attr".
- */
+/// Get the character to use in a separator between horizontally split windows.
+/// Get its attributes in "*attr".
 static int fillchar_hsep(win_T *wp, int *attr)
 {
   *attr = win_hl_attr(wp, HLF_C);
