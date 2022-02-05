@@ -5104,8 +5104,9 @@ static int get_corner_sep_connector(win_T *wp, WindowCorner corner)
  */
 static void draw_sep_connectors_win(win_T *wp)
 {
-  // Don't draw separator connectors unless global statusline is enabled
-  if (global_stl_height() == 0) {
+  // Don't draw separator connectors unless global statusline is enabled and the window has
+  // either a horizontal or vertical separator
+  if (global_stl_height() == 0 || !(wp->w_hsep_height == 1 || wp->w_vsep_width == 1)) {
     return;
   }
 
