@@ -4483,10 +4483,12 @@ static char *set_num_option(int opt_idx, char_u *varp, long value, char *errbuf,
     // 'winminwidth'
     win_setminwidth();
   } else if (pp == &p_ls) {
-    // If global statusline was previously enabled, clear the screen
-    // Also increase height of topframe by 1 if necessary
-    if (old_value == 3 && value != 3) {
+    // When switching to and from global statusline, clear the screen
+    if ((old_value == 3 || value == 3) && old_value != value) {
       redraw_all_later(CLEAR);
+    }
+    // When switching from global statusline, increase height of topframe by 1 if necessary
+    if (old_value == 3 && value != 3) {
       if (tabline_height() + topframe->fr_height == Rows - p_ch - STATUS_HEIGHT) {
         frame_new_height(topframe, topframe->fr_height + STATUS_HEIGHT, false, false);
         (void)win_comp_pos();
