@@ -5837,7 +5837,7 @@ void win_drag_status_line(win_T *dragwin, int offset)
     clear_cmdline = true;
   }
   cmdline_row = row;
-  p_ch = Rows - cmdline_row;
+  p_ch = Rows - cmdline_row - global_stl_height();
   if (p_ch < 1) {
     p_ch = 1;
   }
