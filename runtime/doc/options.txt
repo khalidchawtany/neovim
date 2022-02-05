@@ -2442,7 +2442,13 @@ A jump table for the options with a short description can be found at |Q_op|.
 	  stl:c		' ' or '^'	statusline of the current window
 	  stlnc:c	' ' or '='	statusline of the non-current windows
 	  horiz:c	'─' or '-'      horizontal separators |:split|
+	  horizup:c     '┴' or '-'	upwards facing horizontal separator
+	  horizdown:c   '┬' or '-'      downwards facing horizontal separator
 	  vert:c	'│' or '|'	vertical separators |:vsplit|
+	  vertleft:c    '┤' or '|'      left facing vertical separator
+	  vertright:c   '├' or '|'      right facing vertical separator
+	  verthoriz:c   '┼' or '+'      overlapping vertical and horizontal
+					separator
 	  fold:c	'·' or '-'	filling 'foldtext'
 	  foldopen:c	'-'		mark the beginning of a fold
 	  foldclose:c	'+'		show a closed fold
@@ -2471,7 +2477,12 @@ A jump table for the options with a short description can be found at |Q_op|.
 	  stl:c		StatusLine		|hl-StatusLine|
 	  stlnc:c	StatusLineNC		|hl-StatusLineNC|
 	  horiz:c	VertSplit		|hl-VertSplit|
+	  horizup:c	VertSplit		|hl-VertSplit|
+	  horizdown:c	VertSplit		|hl-VertSplit|
 	  vert:c	VertSplit		|hl-VertSplit|
+	  vertleft:c	VertSplit		|hl-VertSplit|
+	  vertright:c	VertSplit		|hl-VertSplit|
+	  verthoriz:c	VertSplit		|hl-VertSplit|
 	  fold:c	Folded			|hl-Folded|
 	  diff:c	DiffDelete		|hl-DiffDelete|
 	  eob:c		EndOfBuffer		|hl-EndOfBuffer|

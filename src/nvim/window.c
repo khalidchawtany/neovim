@@ -3158,7 +3158,7 @@ static tabpage_T *alt_tabpage(void)
 /*
  * Find the left-upper window in frame "frp".
  */
-static win_T *frame2win(frame_T *frp)
+win_T *frame2win(frame_T *frp)
 {
   while (frp->fr_win == NULL) {
     frp = frp->fr_child;
@@ -3198,7 +3198,6 @@ static bool is_bottom_win(win_T *wp)
   }
   return frp->fr_parent == NULL;
 }
-
 /// Set a new height for a frame.  Recursively sets the height for contained
 /// frames and windows.  Caller must take care of positions.
 ///

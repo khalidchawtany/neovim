@@ -813,7 +813,8 @@ static void win_update(win_T *wp, Providers *providers)
   // Window is zero-height: Only need to draw the separator
   if (wp->w_grid.Rows == 0) {
     // draw the horizontal separator below this window
-    draw_hsep_win(wp, 0);
+    draw_hsep_win(wp);
+    draw_sep_connectors_win(wp);
     wp->w_redr_type = 0;
     return;
   }
@@ -821,7 +822,8 @@ static void win_update(win_T *wp, Providers *providers)
   // Window is zero-width: Only need to draw the separator.
   if (wp->w_grid.Columns == 0) {
     // draw the vertical separator right of this window
-    draw_vsep_win(wp, 0);
+    draw_vsep_win(wp);
+    draw_sep_connectors_win(wp);
     wp->w_redr_type = 0;
     return;
   }
@@ -1756,8 +1758,9 @@ static void win_update(win_T *wp, Providers *providers)
   kvi_destroy(line_providers);
 
   if (wp->w_redr_type >= REDRAW_TOP) {
-    draw_vsep_win(wp, 0);
-    draw_hsep_win(wp, 0);
+    draw_vsep_win(wp);
+    draw_hsep_win(wp);
+    draw_sep_connectors_win(wp);
   }
   syn_set_timeout(NULL);
 
@@ -5045,9 +5048,9 @@ void win_redraw_last_status(const frame_T *frp)
 }
 
 /*
- * Draw the vertical separator right of window "wp" starting with line "row".
+ * Draw the vertical separator right of window "wp"
  */
-static void draw_vsep_win(win_T *wp, int row)
+static void draw_vsep_win(win_T *wp)
 {
   int hl;
   int c;
@@ -5055,15 +5058,15 @@ static void draw_vsep_win(win_T *wp, int row)
   if (wp->w_vsep_width) {
     // draw the vertical separator right of this window
     c = fillchar_vsep(wp, &hl);
-    grid_fill(&default_grid, wp->w_winrow + row, W_ENDROW(wp),
+    grid_fill(&default_grid, wp->w_winrow, W_ENDROW(wp),
               W_ENDCOL(wp), W_ENDCOL(wp) + 1, c, ' ', hl);
   }
 }
 
 /*
- * Draw the horizontal separator below window "wp" starting with column "col".
+ * Draw the horizontal separator below window "wp"
  */
-static void draw_hsep_win(win_T *wp, int col)
+static void draw_hsep_win(win_T *wp)
 {
   int hl;
   int c; // Horizontal separator character
@@ -5072,10 +5075,77 @@ static void draw_hsep_win(win_T *wp, int col)
     // draw the horizontal separator below this window
     c = fillchar_hsep(wp, &hl);
     grid_fill(&default_grid, W_ENDROW(wp), W_ENDROW(wp) + 1,
-              wp->w_wincol + col, W_ENDCOL(wp), c, c, hl);
+              wp->w_wincol, W_ENDCOL(wp), c, c, hl);
   }
 }
 
+/// Get the separator connector for specified window corner of window "wp"
+static int get_corner_sep_connector(win_T *wp, WindowCorner corner)
+{
+  // It's impossible for window to be connected neither vertically nor horizontally
+  // So if they're not vertically connected, assume they're horizontally connected
+  if (vsep_connected(wp, corner)) {
+    if (hsep_connected(wp, corner)) {
+      return wp->w_p_fcs_chars.verthoriz;
+    } else if (corner == WC_TOP_LEFT || corner == WC_BOTTOM_LEFT) {
+      return wp->w_p_fcs_chars.vertright;
+    } else {
+      return wp->w_p_fcs_chars.vertleft;
+    }
+  } else if (corner == WC_TOP_LEFT || corner == WC_TOP_RIGHT) {
+    return wp->w_p_fcs_chars.horizdown;
+  } else {
+    return wp->w_p_fcs_chars.horizup;
+  }
+}
+
+/*
+ * Draw seperator connecting characters on the corners of window "wp"
+ * Assumes global statusline is enabled
+ */
+static void draw_sep_connectors_win(win_T *wp)
+{
+  int hl = win_hl_attr(wp, HLF_C);
+
+  // Determine which edges of the screen the window is located on so we can avoid drawing separators
+  // on corners contained in those edges
+  bool win_at_top;
+  bool win_at_bottom = wp->w_hsep_height == 0;
+  bool win_at_left;
+  bool win_at_right = wp->w_vsep_width == 0;
+  frame_T *frp;
+
+  for (frp = wp->w_frame; frp->fr_parent != NULL; frp = frp->fr_parent) {
+    if (frp->fr_parent->fr_layout == FR_COL && frp->fr_prev != NULL) {
+      break;
+    }
+  }
+  win_at_top = frp->fr_parent == NULL;
+  for (frp = wp->w_frame; frp->fr_parent != NULL; frp = frp->fr_parent) {
+    if (frp->fr_parent->fr_layout == FR_ROW && frp->fr_prev != NULL) {
+      break;
+    }
+  }
+  win_at_left = frp->fr_parent == NULL;
+
+  // Draw the appropriate separator connector in every corner where drawing them is necessary
+  if (!(win_at_top || win_at_left)) {
+    grid_putchar(&default_grid, get_corner_sep_connector(wp, WC_TOP_LEFT),
+                 wp->w_winrow - 1, wp->w_wincol - 1, hl);
+  }
+  if (!(win_at_top || win_at_right)) {
+    grid_putchar(&default_grid, get_corner_sep_connector(wp, WC_TOP_RIGHT),
+                 wp->w_winrow - 1, W_ENDCOL(wp), hl);
+  }
+  if (!(win_at_bottom || win_at_left)) {
+    grid_putchar(&default_grid, get_corner_sep_connector(wp, WC_BOTTOM_LEFT),
+                 W_ENDROW(wp), wp->w_wincol - 1, hl);
+  }
+  if (!(win_at_bottom || win_at_right)) {
+    grid_putchar(&default_grid, get_corner_sep_connector(wp, WC_BOTTOM_RIGHT),
+                 W_ENDROW(wp), W_ENDCOL(wp), hl);
+  }
+}
 /*
  * Get the length of an item as it will be shown in the status line.
  */
@@ -5486,6 +5556,74 @@ bool stl_connected(win_T *wp)
   return false;
 }
 
+/// Check if horizontal separator of window "wp" at specified window corner is connected to the
+/// horizontal separator of another window
+/// Assumes global statusline is enabled
+static bool hsep_connected(win_T *wp, WindowCorner corner) {
+  bool before = (corner == WC_TOP_LEFT || corner == WC_BOTTOM_LEFT);
+  int sep_row = (corner == WC_TOP_LEFT || corner == WC_TOP_RIGHT)
+                ? wp->w_winrow - 1 : W_ENDROW(wp);
+  frame_T *fr = wp->w_frame;
+
+  while(fr->fr_parent != NULL) {
+    if (fr->fr_parent->fr_layout == FR_ROW && (before ? fr->fr_prev : fr->fr_next) != NULL) {
+      fr = before ? fr->fr_prev : fr->fr_next;
+      break;
+    }
+    fr = fr->fr_parent;
+  }
+  if (fr->fr_parent == NULL) {
+    return false;
+  }
+  while (fr->fr_layout != FR_LEAF) {
+    fr = fr->fr_child;
+    if (fr->fr_parent->fr_layout == FR_ROW && before) { 
+      while(fr->fr_next != NULL) {
+        fr = fr->fr_next;
+      }
+    } else {
+      while (fr->fr_next != NULL && frame2win(fr)->w_winrow + fr->fr_height < sep_row) {
+        fr = fr->fr_next;
+      }
+    }
+  }
+
+  return (sep_row == fr->fr_win->w_winrow - 1 || sep_row == W_ENDROW(fr->fr_win));
+}
+
+/// Check if vertical separator of window "wp" at specified window corner is connected to the
+/// vertical separator of another window
+static bool vsep_connected(win_T *wp, WindowCorner corner) {
+  bool before = (corner == WC_TOP_LEFT || corner == WC_TOP_RIGHT);
+  int sep_col = (corner == WC_TOP_LEFT || corner == WC_BOTTOM_LEFT)
+                ? wp->w_wincol - 1 : W_ENDCOL(wp);
+  frame_T *fr = wp->w_frame;
+
+  while(fr->fr_parent != NULL) {
+    if (fr->fr_parent->fr_layout == FR_COL && (before ? fr->fr_prev : fr->fr_next) != NULL) {
+      fr = before ? fr->fr_prev : fr->fr_next;
+      break;
+    }
+    fr = fr->fr_parent;
+  }
+  if (fr->fr_parent == NULL) {
+    return false;
+  }
+  while (fr->fr_layout != FR_LEAF) {
+    fr = fr->fr_child;
+    if (fr->fr_parent->fr_layout == FR_COL && before) { 
+      while(fr->fr_next != NULL) {
+        fr = fr->fr_next;
+      }
+    } else {
+      while (fr->fr_next != NULL && frame2win(fr)->w_wincol + fr->fr_width < sep_col) {
+        fr = fr->fr_next;
+      }
+    }
+  }
+
+  return (sep_col == fr->fr_win->w_wincol - 1 || sep_col == W_ENDCOL(fr->fr_win));
+}
 
 /// Get the value to show for the language mappings, active 'keymap'.
 ///

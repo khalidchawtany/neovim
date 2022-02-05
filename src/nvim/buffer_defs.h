@@ -1226,7 +1226,12 @@ struct window_S {
     int stl;
     int stlnc;
     int horiz;
+    int horizup;
+    int horizdown;
     int vert;
+    int vertleft;
+    int vertright;
+    int verthoriz;
     int fold;
     int foldopen;                    ///< when fold is open
     int foldclosed;                  ///< when fold is closed
