@@ -5101,10 +5101,14 @@ static int get_corner_sep_connector(win_T *wp, WindowCorner corner)
 
 /*
  * Draw seperator connecting characters on the corners of window "wp"
- * Assumes global statusline is enabled
  */
 static void draw_sep_connectors_win(win_T *wp)
 {
+  // Don't draw separator connectors unless global statusline is enabled
+  if (global_stl_height() == 0) {
+    return;
+  }
+
   int hl = win_hl_attr(wp, HLF_C);
 
   // Determine which edges of the screen the window is located on so we can avoid drawing separators
