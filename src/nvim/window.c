@@ -6425,12 +6425,11 @@ void last_status(bool morewin)
 }
 
 // Find a resizable frame and take a line from it to make room for the statusline
-static void resize_frame_for_status(frame_T *fr, bool is_stl_global, bool is_last)
+static void resize_frame_for_status(frame_T *fr, int resize_amount)
 {
   // Find a frame to take a line from.
   frame_T *fp = fr;
   win_T *wp = fr->fr_win;
-  int resize_amount = is_last ? STATUS_HEIGHT : STATUS_HEIGHT - 1;
 
   if (resize_amount == 0) {
     return;
@@ -6449,7 +6448,7 @@ static void resize_frame_for_status(frame_T *fr, bool is_stl_global, bool is_las
       fp = fp->fr_parent;
     }
   }
-  if (fp != fr || is_stl_global) {
+  if (fp != fr) {
     frame_new_height(fp, fp->fr_height - resize_amount, false, false);
     frame_fix_height(wp);
     (void)win_comp_pos();
@@ -6481,7 +6480,7 @@ static void last_status_rec(frame_T *fr, bool statusline, bool is_stl_global)
       } else if (wp->w_status_height == 0 && !is_stl_global && statusline) {
         // Add statusline to window if needed
         wp->w_status_height = STATUS_HEIGHT;
-        resize_frame_for_status(fr, is_stl_global, is_last);
+        resize_frame_for_status(fr, STATUS_HEIGHT);
         comp_col();
       } else if (wp->w_status_height == 0 && is_stl_global
                  && tabline_height() + topframe->fr_height > Rows - p_ch - STATUS_HEIGHT) {
@@ -6502,7 +6501,7 @@ static void last_status_rec(frame_T *fr, bool statusline, bool is_stl_global)
       // If statusline isn't global and the window doesn't have a statusline, re-add it
       wp->w_status_height = STATUS_HEIGHT;
       wp->w_hsep_height = 0;
-      resize_frame_for_status(fr, is_stl_global, is_last);
+      resize_frame_for_status(fr, STATUS_HEIGHT - 1);
       comp_col();
     }
     redraw_all_later(SOME_VALID);
