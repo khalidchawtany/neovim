@@ -2461,7 +2461,8 @@ A jump table for the options with a short description can be found at |Q_op|.
 	"stlnc" the space will be used when there is highlighting, '^' or '='
 	otherwise.
 
-	If 'ambiwidth' is "double" then "horiz", "vert", "foldsep" and "fold"
+	If 'ambiwidth' is "double" then "horiz", "horizup", "horizdown",
+	"vert", "vertleft", "vertright", "verthoriz", "foldsep" and "fold"
 	default to single-byte alternatives.
 
 	Example: >
