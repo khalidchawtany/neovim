@@ -6471,22 +6471,12 @@ static void last_status_rec(frame_T *fr, bool statusline, bool is_stl_global)
         // Remove status line
         wp->w_status_height = 0;
         win_new_height(wp, wp->w_height + STATUS_HEIGHT);
-        // If space required by the global statusline is taken, decrease topframe height
-        if (is_stl_global && tabline_height() + topframe->fr_height > Rows - p_ch - STATUS_HEIGHT) {
-          frame_new_height(topframe, topframe->fr_height - STATUS_HEIGHT, false, false);
-          (void)win_comp_pos();
-        }
         comp_col();
       } else if (wp->w_status_height == 0 && !is_stl_global && statusline) {
         // Add statusline to window if needed
         wp->w_status_height = STATUS_HEIGHT;
         resize_frame_for_status(fr, STATUS_HEIGHT);
         comp_col();
-      } else if (wp->w_status_height == 0 && is_stl_global
-                 && tabline_height() + topframe->fr_height > Rows - p_ch - STATUS_HEIGHT) {
-        // If space required by the global statusline is taken, decrease topframe height
-        frame_new_height(topframe, topframe->fr_height - STATUS_HEIGHT, false, false);
-        (void)win_comp_pos();
       }
     } else if (wp->w_status_height != 0 && is_stl_global) {
       // If statusline is global and the window has a statusline, replace it with a horizontal

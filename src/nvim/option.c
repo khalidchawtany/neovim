@@ -4483,19 +4483,20 @@ static char *set_num_option(int opt_idx, char_u *varp, long value, char *errbuf,
     // 'winminwidth'
     win_setminwidth();
   } else if (pp == &p_ls) {
-    // When switching to global statusline, clear the cmdline to remove the ruler if there is one
+    // When switching to global statusline, decrease topframe height
+    // Also clear the cmdline to remove the ruler if there is one
     if (value == 3 && old_value != 3) {
+      frame_new_height(topframe, topframe->fr_height - STATUS_HEIGHT, false, false);
+      (void)win_comp_pos();
       clear_cmdline = true;
     }
     // When switching from global statusline, clear the screen to remove the global statusline
-    // Also increase height of topframe by STATUS_HEIGHT if necessary in order to to re-add the
-    // space previously taken by the global statusline
+    // Also increase height of topframe by STATUS_HEIGHT in order to to re-add the space that was
+    // previously taken by the global statusline
     if (old_value == 3 && value != 3) {
       redraw_all_later(CLEAR);
-      if (tabline_height() + topframe->fr_height == Rows - p_ch - STATUS_HEIGHT) {
-        frame_new_height(topframe, topframe->fr_height + STATUS_HEIGHT, false, false);
-        (void)win_comp_pos();
-      }
+      frame_new_height(topframe, topframe->fr_height + STATUS_HEIGHT, false, false);
+      (void)win_comp_pos();
     }
 
     last_status(false);  // (re)set last window status line.
