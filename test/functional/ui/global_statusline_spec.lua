@@ -35,6 +35,7 @@ describe('global statusline', function()
       [1] = {bold = true, foreground = Screen.colors.Blue1};
       [2] = {bold = true, reverse = true};
     }}
+
     feed('i<CR><CR>')
     screen:expect{grid=[[
                                                                   |
@@ -59,6 +60,7 @@ describe('global statusline', function()
       [3] = {bold = true};
     }}
   end)
+
   it('works with splits', function()
     command('vsplit | split | vsplit | vsplit | wincmd l | split | 2wincmd l | split')
     screen:expect{grid=[[
@@ -84,6 +86,7 @@ describe('global statusline', function()
       [3] = {bold = true, reverse = true};
     }}
   end)
+
   it('works when switching between values of laststatus', function()
     command('set laststatus=1')
     screen:expect{grid=[[
@@ -129,6 +132,7 @@ describe('global statusline', function()
       [1] = {foreground = Screen.colors.Blue, bold = true};
       [2] = {reverse = true, bold = true};
     }}
+
     command('vsplit | split | vsplit | vsplit | wincmd l | split | 2wincmd l | split')
     command('set laststatus=2')
     screen:expect{grid=[[
@@ -153,6 +157,7 @@ describe('global statusline', function()
       [2] = {foreground = Screen.colors.Blue, bold = true};
       [3] = {reverse = true, bold = true};
     }}
+
     command('set laststatus=3')
     screen:expect{grid=[[
                           {1:│}                {1:│} {1:│}^                    |
@@ -176,6 +181,7 @@ describe('global statusline', function()
       [2] = {foreground = Screen.colors.Blue, bold = true};
       [3] = {reverse = true, bold = true};
     }}
+
     command('set laststatus=0')
     screen:expect{grid=[[
                           {1:│}                {1:│} {1:│}^                    |
@@ -199,6 +205,7 @@ describe('global statusline', function()
       [2] = {foreground = Screen.colors.Blue, bold = true};
       [3] = {reverse = true, bold = true};
     }}
+
     command('set laststatus=3')
     screen:expect{grid=[[
                           {1:│}                {1:│} {1:│}^                    |
