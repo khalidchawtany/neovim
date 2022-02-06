@@ -6432,7 +6432,7 @@ static void resize_frame_for_status(frame_T *fr, int resize_amount)
   win_T *wp = fr->fr_win;
   int n;
 
-  while(resize_amount > 0) {
+  while (resize_amount > 0) {
     while (fp->fr_height <= frame_minheight(fp, NULL)) {
       if (fp == topframe) {
         emsg(_(e_noroom));
