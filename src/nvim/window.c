@@ -6424,36 +6424,38 @@ void last_status(bool morewin)
                   global_stl_height() > 0);
 }
 
-// Find a resizable frame and take a line from it to make room for the statusline
+// Look for resizable frames and take lines from them to make room for the statusline
 static void resize_frame_for_status(frame_T *fr, int resize_amount)
 {
   // Find a frame to take a line from.
   frame_T *fp = fr;
   win_T *wp = fr->fr_win;
+  int n;
 
-  if (resize_amount == 0) {
-    return;
-  }
-
-  while (fp->fr_height - resize_amount < frame_minheight(fp, NULL)) {
-    if (fp == topframe) {
-      emsg(_(e_noroom));
-      return;
+  while(resize_amount > 0) {
+    while (fp->fr_height <= frame_minheight(fp, NULL)) {
+      if (fp == topframe) {
+        emsg(_(e_noroom));
+        return;
+      }
+      // In a column of frames: go to frame above.  If already at
+      // the top or in a row of frames: go to parent.
+      if (fp->fr_parent->fr_layout == FR_COL && fp->fr_prev != NULL) {
+        fp = fp->fr_prev;
+      } else {
+        fp = fp->fr_parent;
+      }
     }
-    // In a column of frames: go to frame above.  If already at
-    // the top or in a row of frames: go to parent.
-    if (fp->fr_parent->fr_layout == FR_COL && fp->fr_prev != NULL) {
-      fp = fp->fr_prev;
+    n = MIN(fp->fr_height - frame_minheight(fp, NULL), resize_amount);
+    resize_amount -= n;
+
+    if (fp != fr) {
+      frame_new_height(fp, fp->fr_height - n, false, false);
+      frame_fix_height(wp);
+      (void)win_comp_pos();
     } else {
-      fp = fp->fr_parent;
+      win_new_height(wp, wp->w_height - n);
     }
-  }
-  if (fp != fr) {
-    frame_new_height(fp, fp->fr_height - resize_amount, false, false);
-    frame_fix_height(wp);
-    (void)win_comp_pos();
-  } else {
-    win_new_height(wp, wp->w_height - resize_amount);
   }
 }
 
