@@ -1355,7 +1355,7 @@ int win_split_ins(int size, int flags, win_T *new_wp, int dir)
     if (flags & (WSP_TOP | WSP_BOT)) {
       int new_fr_height = curfrp->fr_height - new_size;
 
-      if (!((flags & WSP_BOT) && p_ls == 0)) {
+      if (!((flags & WSP_BOT) && p_ls == 0) && global_stl_height() == 0) {
         new_fr_height -= STATUS_HEIGHT;
       } else if (global_stl_height() > 0) {
         if (flags & WSP_BOT) {
