@@ -5216,11 +5216,8 @@ void win_size_restore(garray_T *gap)
   }
 }
 
-/*
- * Update the position for all windows, using the width and height of the
- * frames.
- * Returns the row just after the last window.
- */
+// Update the position for all windows, using the width and height of the frames.
+// Returns the row just after the last window and global statusline (if there is one).
 int win_comp_pos(void)
 {
   int row = tabline_height();
@@ -5235,7 +5232,7 @@ int win_comp_pos(void)
     }
   }
 
-  return row;
+  return row + global_stl_height();
 }
 
 void win_reconfig_floats(void)
@@ -5832,7 +5829,7 @@ void win_drag_status_line(win_T *dragwin, int offset)
     clear_cmdline = true;
   }
   cmdline_row = row;
-  p_ch = Rows - cmdline_row - global_stl_height();
+  p_ch = Rows - cmdline_row;
   if (p_ch < 1) {
     p_ch = 1;
   }
