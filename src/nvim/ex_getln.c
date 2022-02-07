@@ -3631,7 +3631,7 @@ void compute_cmdrow(void)
   } else {
     win_T *wp = lastwin_nofloating();
     cmdline_row = wp->w_winrow + wp->w_height
-                  + wp->w_hsep_height + wp->w_status_height;
+                  + wp->w_hsep_height + wp->w_status_height + global_stl_height();
   }
   lines_left = cmdline_row;
 }
