@@ -1338,19 +1338,10 @@ int win_split_ins(int size, int flags, win_T *new_wp, int dir)
     // one row for the status line
     win_new_height(wp, new_size);
     if (before) {
-      if (is_stl_global) {
-        wp->w_hsep_height = 1;
-      } else {
-        wp->w_hsep_height = 0;
-      }
+      wp->w_hsep_height = is_stl_global ? 1 : 0;
     } else {
       wp->w_hsep_height = oldwin->w_hsep_height;
-
-      if (is_stl_global) {
-        oldwin->w_hsep_height = 1;
-      } else {
-        oldwin->w_hsep_height = 0;
-      }
+      oldwin->w_hsep_height = is_stl_global ? 1 : 0;
     }
     if (flags & (WSP_TOP | WSP_BOT)) {
       int new_fr_height = curfrp->fr_height - new_size;
