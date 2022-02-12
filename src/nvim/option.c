@@ -4494,7 +4494,6 @@ static char *set_num_option(int opt_idx, char_u *varp, long value, char *errbuf,
     // Also increase height of topframe by STATUS_HEIGHT in order to to re-add the space that was
     // previously taken by the global statusline
     if (old_value == 3 && value != 3) {
-      redraw_all_later(CLEAR);
       frame_new_height(topframe, topframe->fr_height + STATUS_HEIGHT, false, false);
       (void)win_comp_pos();
     }
