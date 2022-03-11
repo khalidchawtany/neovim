@@ -211,6 +211,7 @@ Highlight groups:
   |hl-Substitute|
   |hl-TermCursor|
   |hl-TermCursorNC|
+  |hl-WinSeparator| highlights window separators
   |hl-Whitespace| highlights 'listchars' whitespace
 
 Input/Mappings:
@@ -348,6 +349,7 @@ Highlight groups:
   |hl-ColorColumn|, |hl-CursorColumn| are lower priority than most other
   groups
   |hl-CursorLine| is low-priority unless foreground color is set
+  *hl-VertSplit* superseded by |hl-WinSeparator|
 
 Macro/|recording| behavior
   Replay of a macro recorded during :lmap produces the same actions as when it

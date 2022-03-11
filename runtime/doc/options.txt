@@ -2477,13 +2477,13 @@ A jump table for the options with a short description can be found at |Q_op|.
 	  item		highlight group ~
 	  stl:c		StatusLine		|hl-StatusLine|
 	  stlnc:c	StatusLineNC		|hl-StatusLineNC|
-	  horiz:c	VertSplit		|hl-VertSplit|
-	  horizup:c	VertSplit		|hl-VertSplit|
-	  horizdown:c	VertSplit		|hl-VertSplit|
-	  vert:c	VertSplit		|hl-VertSplit|
-	  vertleft:c	VertSplit		|hl-VertSplit|
-	  vertright:c	VertSplit		|hl-VertSplit|
-	  verthoriz:c	VertSplit		|hl-VertSplit|
+	  horiz:c	WinSeparator		|hl-WinSeparator|
+	  horizup:c	WinSeparator		|hl-WinSeparator|
+	  horizdown:c	WinSeparator		|hl-WinSeparator|
+	  vert:c	WinSeparator		|hl-WinSeparator|
+	  vertleft:c	WinSeparator		|hl-WinSeparator|
+	  vertright:c	WinSeparator		|hl-WinSeparator|
+	  verthoriz:c	WinSeparator		|hl-WinSeparator|
 	  fold:c	Folded			|hl-Folded|
 	  diff:c	DiffDelete		|hl-DiffDelete|
 	  eob:c		EndOfBuffer		|hl-EndOfBuffer|
