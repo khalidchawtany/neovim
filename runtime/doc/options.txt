@@ -2441,13 +2441,13 @@ A jump table for the options with a short description can be found at |Q_op|.
 	  item		default		Used for ~
 	  stl:c		' ' or '^'	statusline of the current window
 	  stlnc:c	' ' or '='	statusline of the non-current windows
-	  horiz:c	'─' or '-'      horizontal separators |:split|
-	  horizup:c     '┴' or '-'	upwards facing horizontal separator
-	  horizdown:c   '┬' or '-'      downwards facing horizontal separator
+	  horiz:c	'─' or '-'	horizontal separators |:split|
+	  horizup:c	'┴' or '-'	upwards facing horizontal separator
+	  horizdown:c	'┬' or '-'	downwards facing horizontal separator
 	  vert:c	'│' or '|'	vertical separators |:vsplit|
-	  vertleft:c    '┤' or '|'      left facing vertical separator
-	  vertright:c   '├' or '|'      right facing vertical separator
-	  verthoriz:c   '┼' or '+'      overlapping vertical and horizontal
+	  vertleft:c	'┤' or '|'	left facing vertical separator
+	  vertright:c	'├' or '|'	right facing vertical separator
+	  verthoriz:c	'┼' or '+'	overlapping vertical and horizontal
 					separator
 	  fold:c	'·' or '-'	filling 'foldtext'
 	  foldopen:c	'-'		mark the beginning of a fold
