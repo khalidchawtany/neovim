@@ -3184,10 +3184,10 @@ static bool is_bottom_win(win_T *wp)
   frame_T *frp;
   for (frp = wp->w_frame; frp->fr_parent != NULL; frp = frp->fr_parent) {
     if (frp->fr_parent->fr_layout == FR_COL && frp->fr_next != NULL) {
-      break;
+      return false;
     }
   }
-  return frp->fr_parent == NULL;
+  return true;
 }
 /// Set a new height for a frame.  Recursively sets the height for contained
 /// frames and windows.  Caller must take care of positions.
