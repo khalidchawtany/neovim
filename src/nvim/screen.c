@@ -5078,7 +5078,7 @@ static void draw_hsep_win(win_T *wp)
 /// Get the separator connector for specified window corner of window "wp"
 static int get_corner_sep_connector(win_T *wp, WindowCorner corner)
 {
-  // It's impossible for window to be connected neither vertically nor horizontally
+  // It's impossible for windows to be connected neither vertically nor horizontally
   // So if they're not vertically connected, assume they're horizontally connected
   if (vsep_connected(wp, corner)) {
     if (hsep_connected(wp, corner)) {
