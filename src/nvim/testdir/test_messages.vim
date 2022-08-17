@@ -435,4 +435,48 @@ func Test_cmdheight_zero()
   tabonly
 endfunc
 
+func Test_cmdheight_showmode()
+  set cmdheight=0
+  set showmode
+
+  call feedkeys("i\<C-O>", 'ntx')
+  redraw
+
+  " The "-- (insert) --" indicator should not be visible.
+  let chars = map(range(1, &columns), 'nr2char(screenchar(&lines, v:val))')
+  let str = trim(join(chars, ''))
+  call assert_equal('~', str)
+
+  set showmode&
+  set cmdheight&
+endfunc
+
+func Test_cmdheight_zero_shell()
+  CheckUnix
+
+  set cmdheight=0
+  set nomore
+  call setline(1, 'foo!')
+  silent !echo <cWORD> > Xfile.out
+  call assert_equal(['foo!'], readfile('Xfile.out'))
+  call delete('Xfile.out')
+  redraw!
+
+  set more&
+  set cmdheight&
+endfunc
+
+func Test_cmdheight_zero_ctrl_c()
+  set cmdheight=0
+  call feedkeys("\<C-c>\<C-c>", 'ntx')
+  redraw
+
+  " The C-c messages should not be visible.
+  let chars = map(range(1, &columns), 'nr2char(screenchar(&lines, v:val))')
+  let str = trim(join(chars, ''))
+  call assert_equal('~', str)
+
+  set cmdheight&
+endfunc
+
 " vim: shiftwidth=2 sts=2 expandtab
