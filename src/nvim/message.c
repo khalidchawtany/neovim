@@ -3108,7 +3108,7 @@ void repeat_message(void)
 /// Skip this when ":silent" was used, no need to clear for redirection.
 void msg_clr_eos(void)
 {
-  if (msg_silent == 0) {
+  if (msg_silent == 0 && p_ch > 0) {
     msg_clr_eos_force();
   }
 }
@@ -3135,8 +3135,6 @@ void msg_clr_eos_force(void)
               ' ', ' ', HL_ATTR(HLF_MSG));
     grid_fill(&msg_grid_adj, msg_row + 1, Rows, 0, Columns,
               ' ', ' ', HL_ATTR(HLF_MSG));
-  } else {
-    redraw_all_later(CLEAR);
   }
 
   redraw_cmdline = true;  // overwritten the command line
