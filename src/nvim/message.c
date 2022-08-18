@@ -3136,7 +3136,8 @@ void msg_clr_eos_force(void)
     grid_fill(&msg_grid_adj, msg_row + 1, Rows, 0, Columns,
               ' ', ' ', HL_ATTR(HLF_MSG));
   } else {
-    redraw_all_later(CLEAR);
+    redraw_all_later(NOT_VALID);
+    clear_cmdline = true;
   }
 
   redraw_cmdline = true;  // overwritten the command line
