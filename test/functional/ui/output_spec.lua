@@ -185,7 +185,7 @@ describe("shell command :!", function()
         {1:~                                                    }|
         {1:~                                                    }|
         {4:                                                     }|
-        ]]..result..[[                            |
+        ]]..[[                                                     |
         f1                                                   |
         f2                                                   |
         f3                                                   |
